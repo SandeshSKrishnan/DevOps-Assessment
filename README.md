@@ -7,25 +7,9 @@ This project focuses on deploying a scalable, reliable, and maintainable notific
 - **Notification API**: Receives notification requests and queues them.
 - **Email Sender**: Processes messages from the queue and sends emails.
 
-## Table of Contents
-- [Requirements](#requirements)
-- [Architecture](#architecture)
-- [Infrastructure as Code (IaC)](#infrastructure-as-code-iac)
-- [Deployment Process](#deployment-process)
-- [Scalability and Reliability](#scalability-and-reliability)
-- [Observability](#observability)
-- [Security](#security)
-- [Bonus Points](#bonus-points)
-- [Instructions](#instructions)
-- [Evaluation](#evaluation)
-
-## Requirements
 ### Infrastructure as Code (IaC) Tools
-Use one of the following tools to provision infrastructure:
+We've used the following tools to provision infrastructure:
 - Terraform
-- Terraform With AWS CDK
-- AWS CDK (TypeScript or Python)
-- Pulumi (TypeScript or Python)
 
 ### Deployment:
 - **Services**: Deploy the **Notification API** and **Email Sender** using AWS ECS Fargate.
@@ -58,8 +42,6 @@ The architecture consists of:
 ## Infrastructure as Code (IaC)
 Provision the infrastructure using:
 - **Terraform**
-- **AWS CDK (TypeScript/Python)**
-- **Pulumi (TypeScript/Python)**
 
 Ensure the IaC code adheres to best practices, is well-documented, and structured properly.
 
@@ -67,53 +49,34 @@ Ensure the IaC code adheres to best practices, is well-documented, and structure
 1. **Review Microservices**: Understand the provided Notification API and Email Sender microservices.
 2. **Design Deployment**: Plan the deployment strategy considering scalability, reliability, and security.
 3. **Create Dockerfiles**: 
-   - Write Dockerfiles for the Notification microservices.
-   - Build and test the Docker images locally.
+   - Have created a Base docker image with dependencies
+   - Build Notification service docker image: docker build . -f /apps/pt-notification-service/Dockerfile -t notification-api .
+   - Build Email sender docker image: docker build . -f /apps/pt-notification-service/Dockerfile -t email-sender .
 4. **Push to Amazon ECR**:
-   - Create Amazon ECR repositories for each microservice.
-   - Push the Docker images to the respective ECR repositories.
-5. **Provision Infrastructure**: Use the chosen IaC tool to provision necessary AWS services.
+   - Login to ECR
+   - Push the Docker images to the respective ECR repositories:
+      docker tag notification-api:latest <account_id>.dkr.ecr.us-west-2.amazonaws.com/pt-notification-api:latest
+      docker push <account_id>.dkr.ecr.us-west-2.amazonaws.com/notification-api:latest
+      docker tag email-sender:latest <account_id>.dkr.ecr.us-west-2.amazonaws.com/pt-email-sender:latest
+      docker push <account_id>.dkr.ecr.us-west-2.amazonaws.com/email-sender:latest
+5. **Provision Infrastructure**: Use terraform to provision necessary AWS services.
+      - terraform init
+      - terraform fmt
+      - terraform plan
+      - terraform apply
 6. **Deploy Services**: Deploy the microservices using AWS ECS Fargate.
 7. **Implement Logging**: Ensure ECS tasks log application output to CloudWatch.
+      - Cloudwatch log group created for both ECS services
 8. **Auto-Scaling Configuration**: Implement auto-scaling based on 70% CPU usage threshold.
+      - ECS AutoScaling policies set for the target value of 70% CPU usage.
 9. **Health Check**: 
-   - Identify health check endpoints in the microservice code.
+   - Health checks identified.
+      /api for Notification-service
+      /api/notification/send-email for Email-sender
    - Configure ECS health check paths using the identified endpoints.
-10. **Test and Verify**: Ensure services are functioning correctly, can scale, and handle failures.
-11. **Document**: Prepare and include a README file explaining the deployment process, architecture, and operational considerations.
-
-
-
-## Bonus Points
-- Implement a CI/CD pipeline using AWS CodePipeline or GitHub Actions.
-- Propose and implement a strategy for zero-downtime deployments.
-
-## Instructions
-1. **Review Microservices and Configuration**: Understand the Notification API and Email Sender interaction.
-2. **Design Deployment**: Strategize considering all requirements.
-3. **Create Dockerfiles**: Write Dockerfiles, build, and test Docker images.
-4. **Push to Amazon ECR**: Create ECR repositories and push Docker images.
-5. **Provision Infrastructure**: Implement using Terraform, AWS CDK, or Pulumi.
-6. **Deploy Services**: Use AWS ECS or Fargate.
-7. **Implement Logging**: Ensure logs are sent to CloudWatch.
-8. **Configure Auto-Scaling**: Set auto-scaling based on 70% CPU usage.
-9. **Configure Health Checks**: Implement and configure health check paths.
-10. **Test and Verify**: Ensure system correctness, scalability, and fault tolerance.
-11. **Document**: Prepare and include a README file explaining the deployment process and architecture.
-
-## Evaluation
-Your submission will be evaluated based on:
-- Quality, clarity, and maintainability of IaC code.
-- Robustness and appropriateness of deployment architecture.
-- Use and understanding of specified AWS services and best practices.
-- Clarity and completeness of documentation and operational instructions.
-
-## Submission
-Submit your IaC code, configuration files, and README as a ZIP file or a link to a version-controlled repository (e.g., GitHub).
-Fork the repo, complete the assessment, and send a pull request. 
+10. **Test and Verify**: All services have been tested and verified
 
 ---
-
 
 # NotificationWorkspace2
 
